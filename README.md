@@ -184,24 +184,6 @@ All primary actions are handled by the `./manage.sh` script.
 
 ---
 
-## Project Structure
-
-bluesky-twitter-bot/
-├── bluesky_twitter_bot.py      # Core application logic
-├── manage.sh                   # Main script for managing the bot
-├── setup.sh                    # Installation script
-├── requirements.txt            # Python dependencies
-├── .gitignore
-├── LICENSE
-├── README.md
-├── config.json.example         # Copied to config.json on setup
-├── starter_packs.csv.example   # -> starter_packs.csv
-├── feeds.csv.example           # -> feeds.csv
-└── bluesky_reasons.txt.example # -> bluesky_reasons.txt
-
-
----
-
 ## Troubleshooting
 
 <details>
@@ -224,17 +206,6 @@ bluesky-twitter-bot/
 
 </details>
 
----
-
-## Contributing
-
-Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
-
-1.  Fork the repository.
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
-4.  Push to the branch (`git push origin feature/AmazingFeature`).
-5.  Open a Pull Request.
 
 ---
 
