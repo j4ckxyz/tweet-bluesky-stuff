@@ -5,10 +5,6 @@ Bluesky Twitter Bot
 An automated Twitter bot that promotes Bluesky starter packs, custom feeds,
 and reasons to join Bluesky. Posts tweets every 2 hours with smart content
 rotation and character limit handling.
-
-Author: Your Name
-License: MIT
-Repository: https://github.com/yourusername/bluesky-twitter-bot
 """
 
 import csv
