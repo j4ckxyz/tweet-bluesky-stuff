@@ -24,6 +24,10 @@ echo -e "${BLUE}📁 Project directory: $CURRENT_DIR${NC}"
 echo -e "${BLUE}👤 User: $USER${NC}"
 echo
 
+# Check Python version
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}')
+echo -e "${BLUE}🐍 Python version: $PYTHON_VERSION${NC}"
+
 # Create virtual environment
 echo -e "${YELLOW}🐍 Creating Python virtual environment...${NC}"
 python3 -m venv venv
@@ -72,6 +76,11 @@ chmod +x manage.sh
 
 echo
 echo -e "${GREEN}🎉 Setup complete!${NC}"
+echo
+echo -e "${BLUE}🍎 macOS-specific setup complete:${NC}"
+echo "• Service will use Launch Agent (launchd)"
+echo "• Auto-start on user login"
+echo "• Logs in ~/Library/Logs/"
 echo
 echo -e "${YELLOW}📋 Next steps:${NC}"
 echo -e "1. ${BLUE}Get Twitter API credentials${NC} from https://developer.twitter.com/"

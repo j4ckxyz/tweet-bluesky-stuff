@@ -1,272 +1,243 @@
-# Bluesky Twitter Bot 🐦➡️🦋
+# Bluesky Twitter Bot
 
-An automated Twitter bot that promotes your Bluesky starter packs, custom feeds, and reasons to join Bluesky. Tweets automatically every 2 hours with smart content rotation and character‑limit handling.
+An automated bot that promotes your Bluesky content—starter packs, custom feeds, and reasons to join—on Twitter. It tweets automatically every two hours, rotating content and handling character limits.
+
+---
+
+## Table of Contents
+
+1.  [Features](#features)
+2.  [Prerequisites](#prerequisites)
+3.  [Quick Start](#quick-start)
+4.  [Configuration](#configuration)
+5.  [Usage](#usage)
+6.  [How It Works](#how-it-works)
+7.  [Project Structure](#project-structure)
+8.  [Troubleshooting](#troubleshooting)
+9.  [Contributing](#contributing)
+10. [License](#license)
 
 ---
 
 ## Features
 
-- **Automated Posting**  
-  Tweets every 2 hours via macOS Launch Agent  
-- **Smart Content Rotation**  
-  Randomly selects between starter packs, feeds, and Bluesky reasons  
-- **Character‑Limit Handling**  
-  Automatically truncates content to fit Twitter’s 280‑character limit  
-- **Link Preservation**  
-  Always includes important links for starter packs and feeds  
-- **Auto‑start**  
-  Launches automatically when you log into your Mac  
-- **Comprehensive Logging**  
-  Detailed logs for monitoring and troubleshooting  
-
----
-
-## Tweet Formats
-
-### 1. Starter Packs
-
-```text
-Check out my "Tech Enthusiasts" starter pack:  
-Amazing developers and tech innovators you should follow  
-https://bsky.app/starter-pack/tech
-````
-
-### 2. Feeds
-
-```text
-Feed to pin!: Tech News  
-Latest technology news and updates from industry leaders  
-Pin here: https://bsky.app/profile/did:plc:example/feed/tech-news
-```
-
-### 3. Bluesky Reasons
-
-```text
-Bluesky gives you control over your social media experience with customizable algorithms and moderation tools.
-```
+-   **Automated Tweeting**: Posts every 2 hours using `launchd` (macOS) or `systemd` (Linux).
+-   **Content Rotation**: Randomly cycles through starter packs, feeds, and general reasons.
+-   **Smart Truncation**: Automatically shortens text to fit Twitter's 280-character limit while preserving links.
+-   **Cross-Platform**: Works on macOS and major Linux distributions.
+-   **Auto-Start**: Runs automatically on system boot or user login.
+-   **Detailed Logging**: Provides logs for easy monitoring and troubleshooting.
 
 ---
 
 ## Prerequisites
 
-* **macOS** (tested on 12+)
-* **Python** ≥ 3.7
-* **Twitter Developer Account** with API v2 access
-* **Bluesky account** with starter packs and/or custom feeds
+* **macOS** (10.15+) or **Linux** (Ubuntu 18.04+, CentOS 7+, etc.)
+* **Python 3.7+**
+* **Twitter Developer Account** with v2 API access.
+* A **Bluesky account** to promote.
 
 ---
 
 ## Quick Start
 
-1. **Clone the repository**
+1.  **Clone the repository:**
+    ```bash
+    git clone [https://github.com/yourusername/bluesky-twitter-bot.git](https://github.com/yourusername/bluesky-twitter-bot.git)
+    cd bluesky-twitter-bot
+    ```
 
-   ```bash
-   git clone https://github.com/yourusername/bluesky-twitter-bot.git
-   cd bluesky-twitter-bot
-   ```
-2. **Run the setup script**
+2.  **Run the setup script:** This creates a Python virtual environment, installs dependencies, and copies config files.
+    ```bash
+    ./setup.sh
+    ```
 
-   ```bash
-   chmod +x setup.sh
-   ./setup.sh
-   ```
-3. **Get Twitter API credentials**
+3.  **Configure the bot:**
+    * Add your Twitter API credentials to `config.json`.
+    * Add your content to `starter_packs.csv`, `feeds.csv`, and `bluesky_reasons.txt`. (See [Configuration](#configuration) for details).
 
-   * Visit the [Twitter Developer Portal](https://developer.twitter.com/)
-   * Create a new app and generate API keys
-   * Update `config.json` with your credentials
-4. **Configure your content**
+4.  **Test the bot** to post a single tweet immediately:
+    ```bash
+    ./manage.sh test
+    ```
 
-   * `starter_packs.csv` → your Bluesky starter packs
-   * `feeds.csv` → your custom feeds
-   * `bluesky_reasons.txt` → reasons to join Bluesky (one per line)
-5. **Test the bot**
+5.  **Start the automated service:**
 
-   ```bash
-   ./manage.sh test
-   ```
-6. **Start the automated service**
+    <details>
+    <summary><strong>macOS</strong></summary>
 
-   ```bash
-   ./manage.sh start
-   ```
+    The bot runs as a Launch Agent for the current user.
+
+    ```bash
+    # Start the service (runs at login)
+    ./manage.sh start
+
+    # Check its status
+    ./manage.sh status
+    ```
+    - **Logs**: `~/Library/Logs/bsky-promo-tweeter-*.log`
+    - **Service File**: `~/Library/LaunchAgents/com.$(whoami).bsky-promo-tweeter.plist`
+
+    </details>
+
+    <details>
+    <summary><strong>Linux</strong></summary>
+
+    The bot runs as a system-wide `systemd` service.
+
+    ```bash
+    # Install the service file
+    sudo ./manage.sh install-service
+
+    # Start the service now
+    sudo ./manage.sh start
+
+    # Enable the service to run on system boot
+    sudo ./manage.sh enable
+
+    # Check its status
+    sudo ./manage.sh status
+    ```
+    - **Logs**: `/var/log/bsky-promo-tweeter.log` or `journalctl -u bsky-promo-tweeter`
+    - **Service File**: `/etc/systemd/system/bsky-promo-tweeter.service`
+
+    </details>
 
 ---
 
 ## Configuration
 
-### Twitter API Setup
+<details>
+<summary>Click to expand configuration details</summary>
 
-1. Apply for a Twitter Developer account
-2. Create a new app in the Twitter Developer Portal
-3. Generate your API keys and access tokens
-4. Update `config.json`:
+### 1. Twitter API Setup
 
-   ```json
-   {
-     "twitter": {
-       "consumer_key":        "your_consumer_key_here",
-       "consumer_secret":     "your_consumer_secret_here",
-       "access_token":        "your_access_token_here",
-       "access_token_secret": "your_access_token_secret_here"
-     }
-   }
-   ```
+1.  Apply for a [Twitter Developer account](https://developer.twitter.com/) and create a new App.
+2.  Generate your API Key & Secret and Access Token & Secret. Ensure the app has "Read & Write" permissions.
+3.  Add these credentials to the `config.json` file:
 
-### Content Configuration
+    ```json
+    {
+      "twitter": {
+        "consumer_key": "YOUR_CONSUMER_KEY",
+        "consumer_secret": "YOUR_CONSUMER_SECRET",
+        "access_token": "YOUR_ACCESS_TOKEN",
+        "access_token_secret": "YOUR_ACCESS_SECRET"
+      }
+    }
+    ```
 
-#### Starter Packs (`starter_packs.csv`)
+### 2. Content Setup
 
-| name               | description                               | link                                                                     |
-| ------------------ | ----------------------------------------- | ------------------------------------------------------------------------ |
-| Tech Enthusiasts   | Amazing developers and tech innovators    | [https://bsky.app/starter-pack/tech](https://bsky.app/starter-pack/tech) |
-| Artists & Creators | Creative minds sharing incredible content | [https://bsky.app/starter-pack/art](https://bsky.app/starter-pack/art)   |
+Fill the following files with your content.
 
-#### Custom Feeds (`feeds.csv`)
+* **`starter_packs.csv`**:
+    ```csv
+    name,description,link
+    Tech Enthusiasts,Amazing developers and tech innovators,[https://bsky.app/starter-pack/tech](https://bsky.app/starter-pack/tech)
+    ```
+* **`feeds.csv`**:
+    ```csv
+    name,description,link
+    Tech News,Latest technology news and updates,[https://bsky.app/profile/did:plc:example/feed/tech](https://bsky.app/profile/did:plc:example/feed/tech)
+    ```
+* **`bluesky_reasons.txt`** (one reason per line):
+    ```
+    Bluesky gives you control over your social media experience.
+    Join a decentralized social network where you own your data.
+    ```
 
-| name         | description                            | link                                                                                                                 |
-| ------------ | -------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Tech News    | Latest technology news and updates     | [https://bsky.app/profile/did\:plc\:example/feed/tech-news](https://bsky.app/profile/did:plc:example/feed/tech-news) |
-| Creative Art | Stunning artwork from talented artists | [https://bsky.app/profile/did\:plc\:example/feed/art](https://bsky.app/profile/did:plc:example/feed/art)             |
-
-#### Bluesky Reasons (`bluesky_reasons.txt`)
-
-```
-Bluesky gives you control over your social media experience.
-Join a decentralized social network where you own your data.
-Experience social media without corporate manipulation.
-```
-
----
-
-## Usage
-
-The bot includes a management script with the following commands:
-
-```bash
-./manage.sh start        # Start the automated service
-./manage.sh stop         # Stop the service
-./manage.sh restart      # Restart the service
-./manage.sh status       # Check if the service is running
-./manage.sh logs         # View live logs
-./manage.sh errors       # View error logs
-./manage.sh test         # Run the bot once for testing
-./manage.sh test-feeds   # Test feed tweet generation
-```
+</details>
 
 ---
 
-## Project Structure
+## Usage (`manage.sh`)
 
-```
-bluesky-twitter-bot/
-├── bluesky_twitter_bot.py       # Main bot script
-├── config.json.example          # Example configuration
-├── starter_packs.csv.example    # Example starter packs
-├── feeds.csv.example            # Example feeds
-├── bluesky_reasons.txt.example  # Example reasons
-├── requirements.txt             # Python dependencies
-├── manage.sh                    # Management script
-├── setup.sh                     # Setup script
-├── README.md                    # This file
-└── .gitignore                   # Git ignore file
-```
+All primary actions are handled by the `./manage.sh` script.
+
+| Command                     | macOS                | Linux                         | Description                               |
+| --------------------------- | -------------------- | ----------------------------- | ----------------------------------------- |
+| `test`                      | `./manage.sh test`   | `./manage.sh test`            | Posts one tweet immediately.              |
+| `start`                     | `./manage.sh start`  | `sudo ./manage.sh start`      | Starts the automated 2-hour tweet service.|
+| `stop`                      | `./manage.sh stop`   | `sudo ./manage.sh stop`       | Stops the service.                        |
+| `restart`                   | `./manage.sh restart`| `sudo ./manage.sh restart`    | Restarts the service.                     |
+| `status`                    | `./manage.sh status` | `./manage.sh status`          | Checks if the service is running.         |
+| `logs`                      | `./manage.sh logs`   | `./manage.sh logs`            | Displays the latest log entries.          |
+| `enable`                    | N/A                  | `sudo ./manage.sh enable`     | Enables the service to start on boot.     |
+| `disable`                   | N/A                  | `sudo ./manage.sh disable`    | Disables auto-start on boot.              |
+| `install-service`           | N/A                  | `sudo ./manage.sh install`    | (Re)installs the systemd service file.    |
+| `help`                      | `./manage.sh help`   | `./manage.sh help`            | Shows all available commands.             |
 
 ---
 
 ## How It Works
 
-1. **Launch Agent**: Uses macOS Launch Agent to schedule tweets every 2 hours
-2. **Content Selection**: Randomly chooses between starter packs, feeds, or Bluesky reasons
-3. **Tweet Generation**: Formats content according to predefined templates
-4. **Character Management**: Truncates descriptions while preserving links
-5. **API Integration**: Posts tweets using Twitter API v2 with OAuth 1.0a
+<details>
+<summary>Click to expand technical details</summary>
+
+* **Scheduling**: `launchd` (macOS) or a `systemd` timer (Linux) triggers the main Python script every 2 hours (`7200` seconds).
+* **Execution**: The `manage.sh` script is a wrapper that simplifies interaction with the respective OS service manager and the Python script.
+* **Content Logic**: The `bluesky_twitter_bot.py` script randomly selects a content type (starter pack, feed, or reason), formats it into a tweet, truncates the description if necessary, and posts it via the Twitter API v2.
+* **Error Handling**: The script includes basic error handling and logs API responses for troubleshooting.
+
+</details>
+
+---
+
+## Project Structure
+
+bluesky-twitter-bot/
+├── bluesky_twitter_bot.py      # Core application logic
+├── manage.sh                   # Main script for managing the bot
+├── setup.sh                    # Installation script
+├── requirements.txt            # Python dependencies
+├── .gitignore
+├── LICENSE
+├── README.md
+├── config.json.example         # Copied to config.json on setup
+├── starter_packs.csv.example   # -> starter_packs.csv
+├── feeds.csv.example           # -> feeds.csv
+└── bluesky_reasons.txt.example # -> bluesky_reasons.txt
+
 
 ---
 
 ## Troubleshooting
 
-### Common Issues
+<details>
+<summary>Click to expand troubleshooting steps</summary>
 
-* **Bot not running**
+1.  **Check the logs**: The first step is always to check for errors.
+    ```bash
+    ./manage.sh logs
+    ```
+2.  **Check the service status**: Is the bot running?
+    ```bash
+    ./manage.sh status
+    ```
+3.  **Run a manual test**: This will often show API or content errors directly.
+    ```bash
+    ./manage.sh test
+    ```
+4.  **Verify API Keys**: A `401` or `403` error in the logs usually means your keys in `config.json` are incorrect or lack "Read & Write" permissions.
+5.  **Python Environment**: Ensure dependencies are installed correctly by running `pip install -r requirements.txt` inside the virtual environment (`source venv/bin/activate`).
 
-  ```bash
-  ./manage.sh status
-  ./manage.sh logs
-  ./manage.sh restart
-  ```
-* **Twitter API errors**
-
-  * Verify credentials in `config.json`
-  * Check API access in Twitter Developer Portal
-  * Ensure you’re not hitting rate limits
-* **Python environment issues**
-
-  ```bash
-  source venv/bin/activate
-  pip install -r requirements.txt
-  ```
-
-### Log Files
-
-* **Bot activity:** `~/Library/Logs/bsky-promo-tweeter.log`
-* **Standard output:** `~/Library/Logs/bsky-promo-tweeter-stdout.log`
-* **Errors:** `~/Library/Logs/bsky-promo-tweeter-stderr.log`
+</details>
 
 ---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a feature branch
+Pull requests are welcome! For major changes, please open an issue first to discuss what you would like to change.
 
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-3. Commit your changes
-
-   ```bash
-   git commit -m "Add amazing feature"
-   ```
-4. Push to your branch
-
-   ```bash
-   git push origin feature/amazing-feature
-   ```
-5. Open a Pull Request
+1.  Fork the repository.
+2.  Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4.  Push to the branch (`git push origin feature/AmazingFeature`).
+5.  Open a Pull Request.
 
 ---
 
 ## License
 
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
----
-
-## Security
-
-* **Never commit** `config.json` with real credentials
-* **Keep** your Twitter API keys secure
-* **The bot** runs with your user permissions only
-* **Sensitive** files are included in `.gitignore`
-
----
-
-## Support
-
-1. Check the Troubleshooting section above
-2. Search existing issues
-3. Open a new issue with detailed information
-
----
-
-## Acknowledgments
-
-* Built for the Bluesky community
-* Uses Twitter API v2 for posting
-* Inspired by the need for better social media promotion tools
-
----
-
-Made with ❤️ for the Bluesky community
-Help grow the open social web by promoting Bluesky starter packs and feeds!
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
